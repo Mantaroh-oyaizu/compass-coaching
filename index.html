@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1b120c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>フレイア・クロニクル 灯守の旅立ち｜無料体験版</title>
+<meta name="description" content="月を失ったフレイア大陸で、見習い灯守リオが仲間と出会う。ブラウザですぐ遊べる約5〜10分の無料体験版RPG。">
+<meta property="og:title" content="フレイア・クロニクル 灯守の旅立ち｜無料体験版">
+<meta property="og:description" content="月を失った大陸で、人とモンスターの絆が灯をともす。ブラウザですぐ遊べるRPG体験版。">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <div id="game">
+    <div id="stage">
+      <canvas id="cv"></canvas>
+      <div id="hud">
+        <div id="obj"><span class="objLabel">次にすること</span><span id="objText"></span></div>
+        <button id="btnMenu" class="hudBtn" aria-label="メニュー">メニュー</button>
+      </div>
+      <div id="banner" hidden></div>
+      <div id="dlg" hidden>
+        <div id="dlgFace"><canvas id="faceCv" width="56" height="52"></canvas></div>
+        <div id="dlgBody">
+          <div id="dlgName"></div>
+          <div id="dlgText"></div>
+          <div id="dlgChoices"></div>
+        </div>
+        <div id="dlgNext">▼</div>
+      </div>
+      <div id="battleUI" hidden>
+        <div id="bWarn" hidden></div>
+        <div id="bPanel">
+          <div id="bMsg"></div>
+          <div id="bStatus"></div>
+          <div id="bCmdHead"></div>
+          <div id="bCmd"></div>
+        </div>
+      </div>
+      <div id="toast" hidden></div>
+      <div id="fader"></div>
+    </div>
+    <div id="padL" class="pad">
+      <div id="dpad" aria-label="移動パッド">
+        <div class="dp up"></div><div class="dp down"></div><div class="dp left"></div><div class="dp right"></div>
+        <div class="dpc"></div>
+      </div>
+    </div>
+    <div id="padR" class="pad">
+      <button id="btnB" class="rbtn" aria-label="メニュー／もどる"><span>B</span><small>メニュー</small></button>
+      <button id="btnA" class="rbtn" aria-label="決定・はなす"><span>A</span><small>決定・はなす</small></button>
+    </div>
+  </div>
+
+  <!-- 読み込み -->
+  <div id="scrLoading" class="screen">
+    <div class="loadBox">
+      <div class="lantern"></div>
+      <p id="loadMsg">冒険の準備をしています…</p>
+      <div class="bar"><div id="loadBar"></div></div>
+      <div id="loadErr" hidden>
+        <p>素材の読み込みに失敗しました。<br>通信状況を確認して、もう一度お試しください。</p>
+        <button id="btnRetry" class="btn">再読み込み</button>
+        <button id="btnSkipLoad" class="btn sub">地図なしで続ける</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- タイトル -->
+  <div id="scrTitle" class="screen" hidden>
+    <canvas id="titleCv"></canvas>
+    <div class="titleInner">
+      <div class="tSub">無料体験版</div>
+      <h1 class="tMain"><span class="tEn">FREIA CHRONICLE</span>フレイア・クロニクル</h1>
+      <div class="tSub2">― 灯守（ひもり）の旅立ち ―</div>
+      <div class="tBtns">
+        <button id="btnStart" class="btn big">冒険をはじめる</button>
+        <button id="btnContinue" class="btn" hidden>つづきから</button>
+        <button id="btnTitleSettings" class="btn sub">サウンド・設定</button>
+      </div>
+      <p class="tNote">約5〜10分／音が出ます（設定で調整できます）</p>
+    </div>
+  </div>
+
+  <!-- 導入テキスト -->
+  <div id="scrIntro" class="screen" hidden>
+    <div id="introText"></div>
+    <div class="introHint">画面をタップ／Enterで進む</div>
+    <button id="btnSkipIntro" class="btn sub small">スキップ</button>
+  </div>
+
+  <!-- 世界地図 -->
+  <div id="scrMap" class="screen" hidden>
+    <div id="mapTitle"></div>
+    <div id="mapWrap">
+      <img id="mapImg" alt="フレイア大陸の地図">
+      <svg id="mapSvg" viewBox="0 0 1536 1024" preserveAspectRatio="none"></svg>
+      <div id="mapMarks"></div>
+    </div>
+    <div id="mapCaption"></div>
+    <button id="btnMapNext" class="btn">すすむ</button>
+  </div>
+
+  <!-- 全滅 -->
+  <div id="scrOver" class="screen" hidden>
+    <div class="overBox">
+      <h2>全滅してしまった……</h2>
+      <p>けれど、灯はまだ消えていない。</p>
+      <button id="btnRetryBattle" class="btn big">直前から再挑戦する</button>
+      <button id="btnOverTitle" class="btn sub">タイトルへ戻る</button>
+    </div>
+  </div>
+
+  <!-- エンディング -->
+  <div id="scrEnd" class="screen" hidden>
+    <canvas id="endCv"></canvas>
+    <div class="endInner">
+      <div class="e1">無料体験版クリア</div>
+      <div class="e2">冒険は、まだ始まったばかり。</div>
+      <div class="e3">TO BE CONTINUED</div>
+      <div class="e4">本編、乞うご期待</div>
+      <div class="e5">2027年春 公開予定</div>
+      <div class="e6">※体験版用の予告演出です。正式な公開時期は未定です。</div>
+      <div class="eBtns">
+        <button id="btnAgain" class="btn big">もう一度遊ぶ</button>
+        <button id="btnEndTitle" class="btn">タイトルへ戻る</button>
+        <button id="btnShare" class="btn sub">体験版のURLを共有する</button>
+      </div>
+      <p class="eThanks">遊んでくれて、ありがとう。</p>
+    </div>
+  </div>
+
+  <!-- モーダル -->
+  <div id="modal" hidden>
+    <div id="modalBox">
+      <div id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<noscript><p style="color:#fff;padding:20px">このゲームを遊ぶにはJavaScriptを有効にしてください。</p></noscript>
+<script src="js/gfx.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/story.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
